@@ -1,0 +1,12 @@
+<launch>
+  <group ns="gimbal">
+    <node name="controller"
+          pkg="storm32_gimbal"
+          type="storm32_node.py"
+          output="screen"
+          respawn="true">
+      <param name="frame_id" value="map" />
+      <param name="port" value="/dev/gimbal" />
+    </node>
+  </group>
+</launch>
