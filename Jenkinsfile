@@ -47,6 +47,11 @@ pipeline {
             '''
           }
         }
+        stage('Format') {
+          steps {
+            sh '[ -z "$(yapf --recursive --parallel --diff .)" ]'
+          }
+        }
       }
     }
   }
