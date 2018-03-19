@@ -1,10 +1,10 @@
 # ROS STorM32 Gimbal Driver
 
-[master]: https://dev.mcgillrobotics.com/buildStatus/icon?job=ros-storm32-gimbal_master
-[master url]: https://dev.mcgillrobotics.com/job/ros-storm32-gimbal_master
+[master]: https://dev.mcgillrobotics.com/buildStatus/icon?job=ros-storm32-gimbal/master
+[master url]: https://dev.mcgillrobotics.com/blue/organizations/jenkins/ros-storm32-gimbal/activity
 [![master]][master url]
 
-This is a driver to communicate with STorm32 gimbal controllers.
+This is a driver to communicate with STorM32 gimbal controllers.
 
 *This package has been tested on ROS Kinetic Kame on Ubuntu 16.04.*
 
