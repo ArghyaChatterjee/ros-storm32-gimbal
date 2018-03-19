@@ -22,7 +22,7 @@ Before proceeding, make sure to install all dependencies by running:
 
 ```bash
 rosdep update
-rosdep install interop
+rosdep install storm32_gimbal
 ```
 
 ## Compiling
