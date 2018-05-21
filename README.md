@@ -1,7 +1,7 @@
 # ROS STorM32 Gimbal Driver
 
 [master]: https://dev.mcgillrobotics.com/buildStatus/icon?job=ros-storm32-gimbal/master
-[master url]: https://dev.mcgillrobotics.com/blue/organizations/jenkins/ros-storm32-gimbal/activity
+[master url]: https://dev.mcgillrobotics.com/job/ros-storm32-gimbal/job/master
 [![master]][master url]
 
 This is a driver to communicate with STorM32 gimbal controllers.
@@ -51,6 +51,34 @@ rosrun storm32_gimbal storm32_node.py port:=<device_path> frame:=<frame_name>
 ```
 
 A sample launch file is available in the `launch` directory.
+
+## Interfacing
+
+### The `gimbal_ref` frame
+
+All orientations used by this package are relative to a global reference frame
+called `gimbal_ref`. This reference frame is attached to the gimbal, and has a
+z axis always pointing away from the center of the earth (i.e. it does not
+pitch or roll, but can yaw).
+
+### Topics
+
+This package publishes to two topics:
+
+- `~camera_orientation`: The IMU1 readings as a `QuaternionStamped` message
+  (i.e. the orientation of the gimballed link relative to the global
+  `gimbal_ref` frame). Since the link is stabilized, this should always be
+  approximately the target orientation of the gimbal.
+- `~controller_orientation`: The IMU2 readings as a `QuaternionStamped` message
+  (i.e. the orientation of the STorM32 board relative to the global
+  `gimbal_ref` frame). This should represent the orientation of the gimbal and
+  is not stabilized.
+
+You can also set a new target orientation relative to the `gimbal_ref` frame by
+publishing a `GimbalOrientation` message to the `~target_orientation` topic.
+The `orientation` field is expected to be relative to the `gimbal_ref` frame,
+and the `unlimited` field defines whether the controller should attempt to
+limit its rotation to hard set limits on the STorM32 controller.
 
 ## Contributing
 
