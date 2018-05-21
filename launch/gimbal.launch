@@ -5,7 +5,7 @@
           type="storm32_node.py"
           output="screen"
           respawn="true">
-      <param name="frame_id" value="map" />
+      <param name="frame_id" value="gimbal_ref" />
       <param name="port" value="/dev/gimbal" />
     </node>
   </group>

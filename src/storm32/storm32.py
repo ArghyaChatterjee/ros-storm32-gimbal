@@ -11,13 +11,13 @@ from threading import Lock
 
 
 def _BV(b):
-    '''Quick function to get bit value.
+    """Quick function to get bit value.
 
     Args:
         b: Bit to shift to.
 
     Returns: Shifted value.
-    '''
+    """
     return 1 << b
 
 
@@ -160,12 +160,12 @@ class Storm32(object):
 
     _BOARD_STR = {1: "F103CB", 2: "F103RB", 3: "F103RCDE", 4: "F405RG"}
 
-    def __init__(self, baud=115200, port='/dev/ttyACM0'):
-        '''Object initializer for the gimbal object.
+    def __init__(self, baud=115200, port="/dev/ttyACM0"):
+        """Object initializer for the gimbal object.
         Args:
             baud: Baudrate for serial port.
             port: Path for the serial port
-        '''
+        """
         # Start the serial object
         self.serial = serial.Serial(port, baud, timeout=0)
         self.serial.flush()
@@ -173,13 +173,13 @@ class Storm32(object):
         self.lock = Lock()
 
     def _send_msg(self, cmd, data=[]):
-        '''Send a message to the gimbal controller.
+        """Send a message to the gimbal controller.
 
         Args:
             msg_id: Message command.
             data: Data list, optional.
-        returns response of the gimbal controller as an 'int' list.
-        '''
+        returns response of the gimbal controller as an "int" list.
+        """
         # Constuct the message
         msg_len = len(data)
         msg = [msg_len, cmd]
@@ -201,16 +201,16 @@ class Storm32(object):
         return response
 
     def __get_msg(self, cmd):
-        '''Get the response from the controller.
+        """Get the response from the controller.
 
         Args:
             cmd: Command expected.
 
-        return: response from the gimbal controller as an 'int' list, empty
+        return: response from the gimbal controller as an "int" list, empty
         list of timeout.
 
         Raise: All ACK Exceptions.
-        '''
+        """
         # Read the serial port and record start time
         self.buff.extend(self.serial.read(100))
         start_time = time()
@@ -264,140 +264,140 @@ class Storm32(object):
         return []
 
     def _float_to_bytes(self, value):
-        '''Convert a float into a little-endian 'int' list of 4 'int'.
+        """Convert a float into a little-endian "int" list of 4 "int".
 
         Args:
             value: the float to be converted.
 
-        returns: Little-endian 'int' list of 4 'int'.
-        '''
+        returns: Little-endian "int" list of 4 "int".
+        """
 
         a = list(struct.pack("!f", value))
         return list(map(ord, reversed(a)))
 
     def _int_to_bytes(self, value):
-        '''Convert a signed or unsigned 16-bit 'int' into a little-endian 'int'
-        list of 2 'int'.
+        """Convert a signed or unsigned 16-bit "int" into a little-endian "int"
+        list of 2 "int".
 
         Args:
-            value: 16-bit 'int' to be converted.
+            value: 16-bit "int" to be converted.
 
-        returns: Little-endian 'int' list of 2 'int'
-        '''
+        returns: Little-endian "int" list of 2 "int"
+        """
         return [value & 0xFF, (value >> 8) & 0xFF]
 
     def _bytes_to_uint(self, byte_low, byte_high):
-        '''Convert 2 bytes into a unsigned 16-bit int.
+        """Convert 2 bytes into a unsigned 16-bit int.
 
         Args:
             byte_low: the lower byte of the int
             byte_hight: the higher byte of the int
-        returns: 16-bit unsiged 'int'
-        '''
+        returns: 16-bit unsiged "int"
+        """
         return byte_high << 8 | byte_low
 
     def _bytes_to_int(self, byte_low, byte_high):
-        '''Convert 2 bytes into a 16-bit int.
+        """Convert 2 bytes into a 16-bit int.
 
         Args:
             byte_low: the lower byte of the int
             byte_hight: the higher byte of the int
-        returns: 16-bit signed 'int'
-        '''
+        returns: 16-bit signed "int"
+        """
         value = self._bytes_to_uint(byte_low, byte_high)
         if value > _BV(15):
             value -= _BV(16)
         return value
 
     def get_version(self):
-        '''Get the version information form the gimbal controller.
+        """Get the version information form the gimbal controller.
 
         returns: Dictionary with all the informations, return empty dictionary
         on timeout.
-        '''
+        """
         msg = self._send_msg(self._CMD_GET_VERSION)
         if msg:
             info = {}
             firm_v = self._bytes_to_uint(msg[2], msg[3]) / 100.0
             layout_v = self._bytes_to_uint(msg[4], msg[5]) / 100.0
             capabilities = self._bytes_to_uint(msg[6], msg[7])
-            info['Firmware Version'] = firm_v
-            info['Layout Version'] = layout_v
+            info["Firmware Version"] = firm_v
+            info["Layout Version"] = layout_v
             for k, v in self._CAPABILITIES_STR.items():
                 info[v] = bool(k & capabilities)
             for k, v in self._BOARD_STR.items():
                 if capabilities & 0xF == k:
-                    info['Board'] = v
+                    info["Board"] = v
             return info
         return {}
 
     def restart_controller(self):
-        '''Send 'xx' to restart the gimbal controller.
+        """Send "xx" to restart the gimbal controller.
 
-        returns: 'True' for success, 'False' for error.
-        '''
+        returns: "True" for success, "False" for error.
+        """
         with self.lock:
             self.serial.flush()
-            self.serial.write('xx')
+            self.serial.write("xx")
 
             # Wait a bit to make sure the response is in
             sleep(0.1)
             s = self.serial.read()
-        if s == 'o':
+        if s == "o":
             return True
         return False
 
     def get_data(self):
-        '''Get all data from the controller.
+        """Get all data from the controller.
 
-        returns: data bytes list in 'int', refer to Wiki for data format, empty
+        returns: data bytes list in "int", refer to Wiki for data format, empty
         list on timeout.
-        '''
+        """
         msg = self._send_msg(self._CMD_GET_DATA, [0])
         return msg
 
     def get_datafields(self, mask_low, mask_high):
-        '''Get data from specfic field or fields from the controller.
+        """Get data from specfic field or fields from the controller.
 
         Args:
             mask_low: lower bitmask. Refer
             mast_high: higher bitmask.
 
-        Returns: data bytes list in 'int', refer to Wiki for data format, empty
+        Returns: data bytes list in "int", refer to Wiki for data format, empty
         on timeout
         Raises: All ACK Exceptions
-        '''
+        """
         msg = self._send_msg(self._CMD_GET_DATAFIELDS, [mask_low, mask_high])
         return msg
 
     def get_time(self):
-        ''' Get time data from gimbal controller.n
+        """ Get time data from gimbal controller.n
 
-        returns: List of 2 'int' in [systicks, cycle_time], empty list on
+        returns: List of 2 "int" in [systicks, cycle_time], empty list on
         timeout.
-        '''
+        """
         msg = self.get_datafields(0x02, 0x00)
         if msg:
             return [msg[4] | msg[5] << 8, msg[6] | msg[7] << 8]
         return [0, 0]
 
     def set_pitch_roll_yaw(self, pitch=1500, roll=1500, yaw=1500):
-        '''Set the pitch, roll, yaw of the gimbal controller as RC command.
-        Mapped by the RC input settings, Value '1500' is center and value '0'
+        """Set the pitch, roll, yaw of the gimbal controller as RC command.
+        Mapped by the RC input settings, Value "1500" is center and value "0"
         is reset. This function will set the angles relative to set_angles
         function, but the reset value will reset the set_angles as well.
         Args:
-            pitch: 'int' value from '700' to '2300', or 0, optional,
-            default '1500'.
-            roll: 'int' value from '700' to '2300', or 0, optional,
-            default '1500'.
-            yaw: 'int' value from '700' to '2300', or 0, optional,
-            default '1500'.
+            pitch: "int" value from "700" to "2300", or 0, optional,
+            default "1500".
+            roll: "int" value from "700" to "2300", or 0, optional,
+            default "1500".
+            yaw: "int" value from "700" to "2300", or 0, optional,
+            default "1500".
 
         Returns: ACK_OK message on success, empty list on timeout.
 
         Raise: ValueError if value is out of bound.
-        '''
+        """
         # Check bounds
         rc_cmd = [pitch, roll, yaw]
         data = []
@@ -409,19 +409,19 @@ class Storm32(object):
         return self._send_msg(self._CMD_SET_PITCH_ROLL_YAW, data=data)
 
     def set_angles(self, pitch=0.0, roll=0.0, yaw=0.0, unlimited=False):
-        '''Set relative angles of the gimbal from the starting leveled
+        """Set relative angles of the gimbal from the starting leveled
         position. This function works independently from set_pitch_roll_yaw.
 
         Args:
-            pitch: Pitch angle in float degree, optional, default is '0.0'.
-            roll: Roll angle in float degree, optional, default is '0.0'.
-            yaw: Yaw angle in float degree, optional, default is '0.0'.
-            unlimited: If unlimited is set to 'False' the angles will be 
-            limited by the minimum and maximum settings in RC settings. If 
-            'True' the angles will not be limited, optional, default 'False'
+            pitch: Pitch angle in float degree, optional, default is "0.0".
+            roll: Roll angle in float degree, optional, default is "0.0".
+            yaw: Yaw angle in float degree, optional, default is "0.0".
+            unlimited: If unlimited is set to "False" the angles will be
+            limited by the minimum and maximum settings in RC settings. If
+            "True" the angles will not be limited, optional, default "False"
 
         Returns: ACK_OK message on success, empty list on timeout
-        '''
+        """
         data = self._float_to_bytes(pitch)
         data.extend(self._float_to_bytes(roll))
         data.extend(self._float_to_bytes(yaw))
@@ -429,11 +429,11 @@ class Storm32(object):
         return self._send_msg(self._CMD_SET_ANGLES, data)
 
     def get_imu1_angles(self):
-        '''Get the IMU1 angles from the gimbal controller.
+        """Get the IMU1 angles from the gimbal controller.
 
         Returns: [pitch, roll, yaw] as float in degree, returns empty list on
         timeout.
-        '''
+        """
         data = self.get_datafields(0x20, 0x00)
         if data:
             if data[0] == 8 and data[1] == self._CMD_GET_DATAFIELDS:
@@ -445,12 +445,29 @@ class Storm32(object):
                 return angles
         return []
 
+    def get_imu2_angles(self):
+        """Get the IMU2 angles from the gimbal controller.
+
+        Returns: [pitch, roll, yaw] as float in degree, returns empty list on
+        timeout.
+        """
+        data = self.get_datafields(0x00, 0x01)
+        if data:
+            if data[0] == 8 and data[1] == self._CMD_GET_DATAFIELDS:
+                angles = [
+                    self._bytes_to_int(data[4], data[5]) / 100.0,
+                    self._bytes_to_int(data[6], data[7]) / 100.0,
+                    self._bytes_to_int(data[8], data[9]) / 100.0
+                ]
+                return angles
+        return []
+
     def get_status(self):
-        '''Get status value from the gimbal controller.
+        """Get status value from the gimbal controller.
 
         returns: A dictionary of all parsed values, empty dictionary on
         timeout.
-        '''
+        """
         data = self.get_datafields(0x01, 0x00)
         if data:
             if data[0] == 12 and data[1] == self._CMD_GET_DATAFIELDS:
@@ -459,7 +476,7 @@ class Storm32(object):
                 state = self._bytes_to_uint(data[4], data[5])
                 for k, v in self._STATE_STR.items():
                     if state == k:
-                        result['State'] = v
+                        result["State"] = v
 
                 status = self._bytes_to_uint(data[6], data[7])
                 for k, v in self._STATUS_STR.items():
@@ -470,21 +487,21 @@ class Storm32(object):
                     result[v] = bool(k & status2)
 
                 i2c_errors = self._bytes_to_uint(data[10], data[11])
-                result['I2C Errors'] = i2c_errors
+                result["I2C Errors"] = i2c_errors
 
                 v_bat = self._bytes_to_uint(data[12], data[13])
-                result['VBAT'] = v_bat / 1000.0
+                result["VBAT"] = v_bat / 1000.0
                 return result
 
         return {}
 
     def set_standby(self, state=True):
-        '''Set the gimbal in or out of standby mode.
+        """Set the gimbal in or out of standby mode.
 
         Args:
-            state: 'True' to set the gimbal to standby mode, 'False' to exit
-            standby mode, optional, default is 'True'
+            state: "True" to set the gimbal to standby mode, "False" to exit
+            standby mode, optional, default is "True"
 
         Returns: ACK_OK on success, empty list on timeout.
-        '''
+        """
         return self._send_msg(self._CMD_SET_STANDBY, [state])
