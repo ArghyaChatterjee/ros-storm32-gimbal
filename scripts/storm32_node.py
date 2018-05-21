@@ -49,8 +49,8 @@ def gimbal_quaternion_callback(msg):
                   msg.orientation.w)
     euler = tf.transformations.euler_from_quaternion(quaternion, axes="syxz")
     euler = list(map(encode_angle, euler))
-    rospy.logdebug_throttle(1.0, (
-        "set_angles : pitch={0}, roll={1}, yaw={2}, unlimited={3}").format(
+    rospy.logdebug_throttle(
+        1.0, "set_angles : pitch={0}, roll={1}, yaw={2}, unlimited={3}".format(
             euler[0], euler[1], euler[2], msg.unlimited))
     try:
         response = gimbal.set_angles(*euler, unlimited=msg.unlimited)
@@ -141,8 +141,10 @@ def pub_timer_callback(event):
         imu2 = (gimbal.get_imu2_angles(), controller_pub, "imu2")
         for euler, pub, name in (imu1, imu2):
             if euler:
-                rospy.logdebug_throttle(1.0, ("get_{0}_angles: pitch={1:.2f}, roll={2:.2f}, yaw={3:.2f}").format(
-                                                name, *euler))
+                rospy.logdebug_throttle(
+                    1.0,
+                    "get_{0}_angles: pitch={1:.2f}, roll={2:.2f}, yaw={3:.2f}".
+                    format(name, *euler))
                 euler = list(map(np.radians, euler))
                 q = tf.transformations.quaternion_from_euler(
                     *euler, axes="syxz")
