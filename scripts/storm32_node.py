@@ -112,7 +112,8 @@ def restart_controller(req):
             # Shutdown the node on success restart
             sub.unregister()
             pub_timer.shutdown()
-            pub.unregister()
+            camera_pub.unregister()
+            controller_pub.unregister()
             rospy.Timer(rospy.Duration(0.1), restart_shutdown_callback, True)
         else:
             response.message = "Gimbal restart failed!"
