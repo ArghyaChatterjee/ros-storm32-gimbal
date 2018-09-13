@@ -6,6 +6,9 @@
 
 This is a driver to communicate with STorM32 gimbal controllers.
 
+**You MUST configure your gimbal with the Windows app before using this
+package.**
+
 *This package has been tested on ROS Kinetic Kame on Ubuntu 16.04.*
 
 ## Setting up
